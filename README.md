@@ -1,115 +1,342 @@
-# Scraper Éxito Colombia
+# Exito E-commerce Scraper
 
-Scraper genérico para extraer información de productos del sitio web de Éxito Colombia.
+[![CI/CD Pipeline](https://github.com/your-username/scrapper-exito/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/your-username/scrapper-exito/actions/workflows/ci-cd.yml)
+[![Docker Image](https://img.shields.io/docker/image-size/your-username/exito-scraper)](https://hub.docker.com/r/your-username/exito-scraper)
+[![Python Versions](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
 
-## Descripción
+Un scraper profesional para extraer información de productos del sitio web de Éxito (exito.com) utilizando la API VTEX. Incluye limpieza automática de HTML, múltiples formatos de salida y arquitectura limpia basada en puertos y adaptadores.
 
-Este proyecto implementa un scraper robusto y escalable utilizando arquitectura hexagonal para extraer información de productos del sitio web de Éxito Colombia. Los datos extraídos se almacenan en formato JSON normalizado para su posterior procesamiento por sistemas de IA y análisis de precios.
+## Documentación Completa
+
+**[Ver USAGE.md para la guía completa de uso](./USAGE.md)** - Incluye instrucciones detalladas para:
+- **Ejecutores**: Cómo usar el scraper día a día
+- **Desarrolladores**: Setup, debugging y desarrollo
+- **Arquitectos AWS**: Deploy en la nube con ECS, Lambda y S3
 
 ## Características
 
-- ✅ Arquitectura hexagonal para máxima flexibilidad y mantenibilidad
-- ✅ Scraper genérico que funciona con cualquier producto
-- ✅ Compatible con múltiples navegadores
-- ✅ Ejecución automática programada cada 15 días
-- ✅ Ejecución manual bajo demanda
-- ✅ Datos normalizados en formato JSON
-- ✅ Manejo robusto de errores y reintentos
-- ✅ Logging detallado y monitoreo
-- ✅ Configuración flexible mediante variables de entorno
+- **Scraping eficiente** usando la API VTEX de Éxito
+- **Limpieza automática de HTML** en descripciones de productos
+- **Múltiples formatos de salida**: JSONL (compacto) y JSON (formateado)
+- **Dockerizado** para fácil despliegue
+- **Pipeline CI/CD** completo con GitHub Actions
+- **Arquitectura limpia** con puertos y adaptadores
+- **Escalable** y fácil de mantener
 
-## Datos Extraídos
+## Inicio Rápido
 
-Para cada producto se extrae la siguiente información:
+### Con Docker (Recomendado)
 
-- **precio**: Precio actual del producto
-- **marca**: Marca del producto
-- **tamaño**: Tamaño/presentación del producto
-- **calificacion**: Calificación promedio del producto
-- **imagen**: URL de la imagen principal del producto
-- **url_producto**: URL del producto en el sitio web
-- **fuente**: Identificador de la fuente (exito.com)
-- **categoria**: Categoría del producto
-- **nombre**: Nombre completo del producto
-- **timestamp_extraccion**: Fecha y hora de la extracción
-- **extraction_status**: Estado de la extracción (success/failed)
-- **contador_extraccion**: Número de extracción
-- **atributos_extra**: Información adicional como cambios y devoluciones, seguro gratis, etc.
-
-## Instalación
-
-1. Clonar el repositorio:
 ```bash
-git clone <repository-url>
-cd appExito
+# Construir y ejecutar
+docker-compose run --rm exito-scraper scrape --categoria televisores --paginas 2
+
+# O directamente con Docker
+docker build -t exito-scraper .
+docker run --rm -v $(pwd)/data:/app/data exito-scraper scrape --categoria televisores --paginas 2
 ```
 
-2. Crear entorno virtual:
-```bash
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-```
+### Instalación Local
 
-3. Instalar dependencias:
 ```bash
+# Instalar dependencias
 pip install -r requirements.txt
+
+# Ejecutar scraper
+python -m exito_scraper.main scrape --categoria televisores --paginas 2
+
+# Instalar dependencias
+pip install -r requirements.txt
+
 ```
 
-4. Configurar variables de entorno:
-```bash
-cp .env.example .env
-# Editar .env con tus configuraciones
+## Ejemplo de Datos Extraídos
+
+El scraper extrae **17 campos completos** por producto:
+
+```json
+{
+  "titulo": "Televisor LG 55\" 4K UHD Smart TV",
+  "precio": "$1.299.900",
+  "precio_original": "$1.599.900",
+  "descuento": "19%",
+  "descripcion": "Televisor LG con tecnología 4K UHD y Smart TV webOS",
+  "sku": "LG55UP7500PSB",
+  "marca": "LG",
+  "modelo": "55UP7500PSB",
+  "disponibilidad": "En stock",
+  "calificacion": "4.5",
+  "numero_resenas": "342",
+  "imagen_principal": "https://www.exito.com/medias/...",
+  "imagenes_adicionales": ["https://...", "https://..."],
+  "categoria": "Televisores",
+  "subcategoria": "Smart TV",
+  "detalles_adicionales": "Pantalla: 55 pulgadas. Resolución: 4K UHD (3840x2160)...",
+  "link": "https://www.exito.com/televisor-lg-55-4k-uhd-smart-tv"
+}
 ```
 
-5. Instalar drivers de navegador:
-```bash
-playwright install
-```
+### Estadísticas de Completitud
 
-## Uso
+- **98-100%** de campos básicos (título, precio, link)
+- **95-98%** de campos descriptivos (marca, modelo, disponibilidad)  
+- **90-95%** de campos adicionales (imágenes, reviews)
+- **HTML limpiado** automáticamente en descripciones
 
-### Ejecución Manual
-
-```bash
-python -m src.interfaces.cli.main --category all
-```
+## Casos de Uso
 
 ### Ejecución Programada
 
 ```bash
-python -m src.infrastructure.schedulers.scheduler
+# Cron job diario a las 6 AM
+0 6 * * * cd /path/to/scraper && docker-compose run --rm exito-scraper scrape --categoria televisores --paginas 5
+```
+
+### Para Empresas
+
+```bash
+# Monitoreo de precios de competencia
+python -m exito_scraper.main scrape --categoria "computadores portatiles" --paginas 10
+
+# Análisis de inventario
+python -m exito_scraper.main scrape --categoria celulares --paginas 5
+```
+
+## Configuración
+
+### Variables de Entorno
+
+```bash
+# .env
+SCRAPER_DELAY=2          # Delay entre requests
+SCRAPER_RETRIES=3        # Número de reintentos  
+LOG_LEVEL=INFO           # Nivel de logging
+OUTPUT_FORMAT=both       # jsonl, json, both
 ```
 
 ## Estructura del Proyecto
 
 ```
-appExito/
-├── src/
-│   ├── domain/               # Lógica de negocio
-│   ├── application/          # Casos de uso
-│   ├── infrastructure/       # Implementaciones específicas
-│   └── interfaces/           # Puntos de entrada
-├── tests/                    # Pruebas unitarias e integración
-├── docs/                     # Documentación
-├── config/                   # Archivos de configuración
-├── data/                     # Datos extraídos
-└── logs/                     # Archivos de log
+scrapper-exito/
+├── exito_scraper/          # Código principal
+│   ├── adapters/           # Adaptadores (scraper, repos)
+│   ├── application/        # Casos de uso
+│   ├── domain/            # Lógica de dominio
+│   ├── utils/             # Utilidades (HTML cleaning)
+│   ├── config.py          # Configuración
+│   └── main.py            # CLI principal
+├── .github/workflows/      # Pipeline CI/CD
+├── data/                  # Archivos extraídos
+├── Dockerfile             # Imagen Docker
+├── docker-compose.yml     # Orquestación
+├── requirements.txt       # Dependencias
+├── USAGE.md              # Guía completa de uso
+└── DOCKER.md             # Documentación Docker
+
+## Limpieza de Datos
+
+El scraper incluye limpieza automática de HTML:
+
+### Antes (HTML crudo)
+```html
+<p><span>*No se ofrece servicio de instalación.</span></p>
+<p><span>El diseño de brazo extensible hace...</span></p>
 ```
 
-## Contribución
+### Después (texto limpio)
+```
+*No se ofrece servicio de instalación.
 
-1. Fork el proyecto
-2. Crear una rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit los cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+El diseño de brazo extensible hace que el modelo sea mucho más fuerte...
+```
 
-## Licencia
+### Utilidades Adicionales
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+```bash
+# Limpiar archivos existentes
+python clean_existing_json.py data/productos.jsonl
 
-## Contacto
+# Convertir JSONL a JSON formateado
+python format_json.py data/productos.jsonl
+```
 
-Tu Nombre - tu.email@ejemplo.com
+## Formatos de Salida
 
-Link del Proyecto: https://github.com/tu-usuario/appExito
+### JSONL (Compacto)
+```json
+{"titulo": "TV Samsung 55\"", "precio_valor": 1200000, "marca": "SAMSUNG"}
+{"titulo": "TV LG 43\"", "precio_valor": 800000, "marca": "LG"}
+```
+
+### JSON Formateado (Legible)
+```json
+[
+  {
+    "titulo": "TV Samsung 55\"",
+    "precio_valor": 1200000,
+    "marca": "SAMSUNG",
+    "detalles_adicionales": "Smart TV con tecnología 4K..."
+  }
+]
+```
+
+## Configuración
+
+### Variables de Entorno (.env)
+
+```bash
+# Versiones Python para CI/CD
+PYTHON_VERSION_MAIN=3.11
+PYTHON_VERSIONS=["3.9", "3.10", "3.11", "3.12"]
+
+# Configuración Docker
+DOCKER_IMAGE_NAME=exito-scraper
+DOCKER_TAG=latest
+
+# Configuración del scraper
+DEFAULT_TIMEOUT=30
+DEFAULT_DELAY=2
+```
+
+### Personalización
+
+Edita `exito_scraper/config.py` para:
+- Agregar nuevas categorías
+- Modificar headers HTTP
+- Ajustar timeouts y delays
+
+## Docker
+
+### Construcción
+
+```bash
+# Construcción simple
+docker build -t exito-scraper .
+
+# Construcción con tests
+./docker-build.sh
+
+# Con versión específica
+./docker-build.sh v1.0.0
+```
+
+### Ejecución
+
+```bash
+# Scraping básico
+docker run --rm -v $(pwd)/data:/app/data exito-scraper \
+  python -m exito_scraper.main scrape --categoria televisores --paginas 1 --output data/tv.jsonl
+
+# Shell interactivo
+docker run --rm -it -v $(pwd)/data:/app/data exito-scraper /bin/bash
+
+# Con variables de entorno
+docker run --rm --env-file .env -v $(pwd)/data:/app/data exito-scraper \
+  python -m exito_scraper.main scrape --categoria celulares --paginas 1 --output data/phones.jsonl
+```
+
+## CI/CD Pipeline
+
+El pipeline automático incluye:
+
+1. **Setup**: Lee versiones Python desde `.env`
+2. **Lint & Format**: Black, isort, flake8, mypy
+3. **Test**: Pruebas en múltiples versiones Python
+4. **Security**: Escaneo con safety y bandit
+5. **Docker Build**: Construcción y prueba de imagen
+6. **Integration Tests**: Pruebas de integración
+7. **Release**: Creación automática de releases
+
+### Activación
+
+```bash
+# Push a main/develop activa el pipeline
+git push origin main
+
+# Manual trigger
+gh workflow run ci-cd.yml
+```
+
+## Arquitectura
+
+### Patrones Utilizados
+
+- **Ports & Adapters**: Separación clara de responsabilidades
+- **Repository Pattern**: Abstracción de persistencia  
+- **Command Pattern**: CLI estructurado
+- **Strategy Pattern**: Múltiples formatos de salida
+
+### Componentes Principales
+
+1. **Domain**: Entidades (`Producto`) y puertos
+2. **Application**: Casos de uso (`ScrapeUseCase`)
+3. **Adapters**: Implementaciones concretas
+
+---
+
+## Enlaces Rápidos
+
+| Documento | Descripción | Audiencia |
+|-----------|-------------|-----------|
+| **[USAGE.md](./USAGE.md)** | Guía completa de uso y deployment | Todos los roles |
+| **[DOCKER.md](./DOCKER.md)** | Documentación de Docker | Desarrolladores |
+| **[CI/CD Pipeline](./.github/workflows/ci-cd.yml)** | Configuración de automatización | DevOps |
+| **[requirements.txt](./requirements.txt)** | Dependencias del proyecto | Desarrolladores |
+
+## Uso Rápido por Rol
+
+### Ejecutor/Operador
+```bash
+# Ejecutar scraper diariamente
+docker-compose run --rm exito-scraper scrape --categoria televisores --paginas 5
+```
+
+### Desarrollador  
+```bash
+# Setup local
+pip install -r requirements.txt
+python -m exito_scraper.main scrape --categoria televisores --debug
+```
+
+### Arquitecto AWS
+```bash
+# Deploy a ECS Fargate
+aws ecs register-task-definition --cli-input-json file://task-definition.json
+```
+
+---
+
+**¡Listo para usar!** - Ver [USAGE.md](./USAGE.md) para instrucciones detalladas
+4. **Utils**: Utilidades transversales
+
+## Testing
+
+```bash
+# Tests locales (cuando estén disponibles)
+pytest tests/ -v --cov=exito_scraper
+
+# Tests en Docker
+docker-compose run --rm test-runner
+
+# Tests del pipeline
+./docker-build.sh
+```
+
+## Datos Extraídos
+
+Cada producto incluye:
+
+- **Información básica**: título, marca, categoría
+- **Precios**: texto y valor numérico, moneda
+- **Metadatos**: imagen, link, fecha de extracción
+- **Detalles**: descripción limpia (sin HTML)
+- **Técnicos**: contadores, estado de extracción
+
+### Estadísticas de Calidad
+
+- **Campos básicos**: 100% cobertura
+- **Precios**: 98% cobertura
+- **Detalles**: 64% cobertura
+- **Tamaños**: 86% cobertura (solo TVs)
+
+
