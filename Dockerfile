@@ -1,39 +1,72 @@
-FROM python:3.11-slim
+# Multi-stage build for optimization
+FROM python:3.11-slim AS builder
 
-# Instalar dependencias del sistema
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VENV_IN_PROJECT=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    unzip \
+    build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar Chrome y dependencies
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
-
-# Crear directorio de trabajo
+# Set work directory
 WORKDIR /app
 
-# Copiar requirements y instalar dependencias Python
+# Copy dependency files
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Instalar playwright browsers
-RUN playwright install chromium
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copiar código fuente
-COPY . .
+# Production stage
+FROM python:3.11-slim AS production
 
-# Crear usuario no-root
-RUN useradd -m -u 1000 scraper && chown -R scraper:scraper /app
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r scraper \
+    && useradd -r -g scraper scraper
+
+# Set work directory
+WORKDIR /app
+
+# Copy Python dependencies from builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY exito_scraper/ ./exito_scraper/
+COPY format_json.py clean_existing_json.py ./
+COPY requirements.txt ./
+
+# Create data directory
+RUN mkdir -p /app/data && \
+    chown -R scraper:scraper /app
+
+# Switch to non-root user
 USER scraper
 
-# Exponer puerto para métricas
-EXPOSE 8000
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import exito_scraper; print('Health check OK')" || exit 1
 
-# Comando por defecto
-CMD ["python", "-m", "src.infrastructure.schedulers.scheduler"]
+# Default command
+CMD ["python", "-m", "exito_scraper.main", "--help"]
+
+# Labels for metadata
+LABEL maintainer="your-email@example.com" \
+      version="1.0" \
+      description="Exito E-commerce Scraper" \
+      org.opencontainers.image.source="https://github.com/your-username/scrapper-exito"
