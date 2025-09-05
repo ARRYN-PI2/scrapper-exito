@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # Scraper Éxito Colombia
 
 Scraper genérico para extraer información de productos del sitio web de Éxito Colombia.
@@ -69,9 +70,62 @@ playwright install
 ## Uso
 
 ### Ejecución Manual
+=======
+# 🛒 Scraper Exito.com
 
+## 📋 Comandos completos por categoría
+>>>>>>> Stashed changes
+
+### 📱 Celulares
 ```bash
+<<<<<<< Updated upstream
 python -m src.interfaces.cli.main --category all
+=======
+python -m exito_scraper.main scrape --categoria celulares --paginas 10 --output data/celulares.json
+python -m exito_scraper.main scrape --categoria celulares --paginas 5 --output data/celulares.csv
+```
+
+### 📺 Televisores
+```bash
+python -m exito_scraper.main scrape --categoria televisores --paginas 15 --output data/televisores.json
+python -m exito_scraper.main scrape --categoria televisores --paginas 8 --output data/televisores.csv
+```
+
+### 🧺 Lavadoras
+```bash
+python -m exito_scraper.main scrape --categoria lavadoras --paginas 12 --output data/lavadoras.json
+python -m exito_scraper.main scrape --categoria lavadoras --paginas 5 --output data/lavadoras.csv
+```
+
+### ❄️ Refrigeración
+```bash
+python -m exito_scraper.main scrape --categoria refrigeracion --paginas 10 --output data/refrigeradores.json
+python -m exito_scraper.main scrape --categoria refrigeracion --paginas 7 --output data/refrigeradores.csv
+```
+
+### 🔊 Audio
+```bash
+python -m exito_scraper.main scrape --categoria audio --paginas 8 --output data/audio.json
+python -m exito_scraper.main scrape --categoria audio --paginas 6 --output data/audio.csv
+```
+
+### 🎮 Videojuegos
+```bash
+python -m exito_scraper.main scrape --categoria videojuegos --paginas 12 --output data/videojuegos.json
+python -m exito_scraper.main scrape --categoria videojuegos --paginas 5 --output data/videojuegos.csv
+```
+
+### 🏃 Deportes
+```bash
+python -m exito_scraper.main scrape --categoria deportes --paginas 20 --output data/deportes.json
+python -m exito_scraper.main scrape --categoria deportes --paginas 10 --output data/deportes.csv
+```
+
+---
+
+⭐ **Por defecto se genera JSON con calificaciones incluidas**  
+📄 Los productos sin calificación muestran "No tiene Calificacion"
+>>>>>>> Stashed changes
 ```
 
 ### Ejecución Programada
