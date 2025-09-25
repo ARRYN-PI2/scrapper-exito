@@ -1,0 +1,54 @@
+# Docker Compose for development and testing
+version: '3.8'
+
+services:
+  exito-scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: exito-scraper:latest
+    container_name: exito-scraper-dev
+    volumes:
+      - ./data:/app/data
+      - ./exito_scraper:/app/exito_scraper:ro
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    command: python -m exito_scraper.main --help
+    
+  # Development container with interactive shell
+  exito-scraper-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: exito-scraper:dev
+    container_name: exito-scraper-interactive
+    volumes:
+      - ./data:/app/data
+      - ./exito_scraper:/app/exito_scraper
+      - .:/app/workspace:ro
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    
+  # Test runner container
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: exito-scraper:test
+    container_name: exito-scraper-test
+    volumes:
+      - ./data:/app/data
+      - ./tests:/app/tests:ro
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    command: python -c "import exito_scraper; print('Tests would run here')"
