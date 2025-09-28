@@ -26,11 +26,11 @@ El **Exito E-commerce Scraper** es un sistema profesional diseñado para extraer
    - **API VTEX** (Indirecto): Aprovecha la infraestructura VTEX que usa Éxito para su e-commerce
 
 3. **Formatos de Salida Flexibles**:
-    *Guardados en scrapper-exito/data*
+    *Guardados en exito_scraper/data/*
    - **JSONL**: Un producto por línea en formato JSON (eficiente para big data)
    - **CSV**: Archivo estructurado compatible con Excel y herramientas de análisis
    
-   El formato JSONL es procesado por la clase `exito_scraper/adapters/json_repo.py` que toma los datos y genera automáticamente un archivo JSON formateado más legible (`*_formatted.json`) que se exporta a `/data/` para facilitar la lectura humana.
+   El formato JSONL es procesado por la clase `exito_scraper/adapters/json_repo.py` que toma los datos y genera automáticamente un archivo JSON formateado más legible (`*_formatted.json`) que se exporta a `exito_scraper/data/` para facilitar la lectura humana.
 
 4. **Categorías Soportadas**: 7 categorías de productos incluyendo televisores, celulares, electrodomésticos, audio, videojuegos y deportes.
 
@@ -86,7 +86,7 @@ El **Exito E-commerce Scraper** es un sistema profesional diseñado para extraer
 4. 📊 POSTPROCESAMIENTO
    ├─ Genera archivo JSON formateado para lectura humana
    ├─ Aplica indentación y estructura legible
-   └─ Guarda como *_formatted.json en /data/
+   └─ Guarda como *_formatted.json en exito_scraper/data/
 
 5. ✅ FINALIZACIÓN
    ├─ Reporta estadísticas de extracción
@@ -340,7 +340,7 @@ COPY exito_scraper/ ./exito_scraper/
 services:
   exito-scraper:
     volumes:
-      - ./data:/app/data              # Persistencia de datos
+      - ./exito_scraper/data:/app/exito_scraper/data  # Persistencia de datos
       - ./exito_scraper:/app/exito_scraper:ro  # Hot reload
 ```
 
@@ -351,19 +351,19 @@ services:
 ### **1. Análisis de Mercado**
 ```bash
 # Extraer 5 páginas de televisores
-docker-compose run --rm exito-scraper scrape --categoria televisores --paginas 5
+docker-compose run --rm exito-scraper scrape --categoria televisores --paginas 5 --output televisores.jsonl
 ```
 
 ### **2. Monitoreo de Precios**
 ```bash
 # Obtener datos actuales para comparar con históricos
-python -m exito_scraper.main scrape --categoria celulares --paginas 3 --output data/celulares_$(date +%Y%m%d).jsonl
+python -m exito_scraper.main scrape --categoria celulares --paginas 3 --output celulares_$(date +%Y%m%d).jsonl
 ```
 
 ### **3. Investigación de Productos**
 ```bash
 # Datos para ML o análisis estadístico
-docker run --rm -v $(pwd)/data:/app/data exito-scraper scrape --categoria audio --paginas 2
+docker run --rm -v $(pwd)/exito_scraper/data:/app/exito_scraper/data exito-scraper scrape --categoria audio --paginas 2 --output audio.jsonl
 ```
 
 ---

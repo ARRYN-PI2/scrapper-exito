@@ -9,11 +9,18 @@ from .adapters.csv_repo import CsvRepositoryAdapter
 from .application.scrape_usecase import ScrapeCategoryUseCase
 
 def _make_repo(output: str):
-    out = Path(output)
-    if out.suffix.lower() == ".csv":
-        return CsvRepositoryAdapter(str(out))
-    # Default to JSON format for better data structure
-    return JsonRepositoryAdapter(str(out if out.suffix.lower()==".jsonl" else out.with_suffix(".json")), generate_formatted=True)
+    # Usar solo el nombre del archivo, la ruta se maneja internamente
+    filename = Path(output).name
+    
+    if filename.endswith('.csv'):
+        return CsvRepositoryAdapter(filename)
+    elif filename.endswith('.jsonl'):
+        return JsonRepositoryAdapter(filename, generate_formatted=True)
+    else:
+        # Default to JSONL format 
+        if not filename.endswith(('.json', '.jsonl')):
+            filename = filename + '.jsonl'
+        return JsonRepositoryAdapter(filename, generate_formatted=True)
 
 def main():
     parser = argparse.ArgumentParser(description="Scraper Exito.")
@@ -22,7 +29,7 @@ def main():
     s = sub.add_parser("scrape", help="Extraer productos por categoría")
     s.add_argument("--categoria", required=True, choices=sorted(EXPECTED_URLS.keys()), help="Categoría a scrapear")
     s.add_argument("--paginas", type=int, default=1, help="Numero de páginas a extraer (>=1)")
-    s.add_argument("--output", required=True, help="Ruta de salida (.json, .jsonl o .csv) - por defecto JSON")
+    s.add_argument("--output", required=True, help="Nombre del archivo de salida (.json, .jsonl o .csv) - se guarda en exito_scraper/data/")
 
     args = parser.parse_args()
 

@@ -9,7 +9,7 @@ services:
     image: exito-scraper:latest
     container_name: exito-scraper-dev
     volumes:
-      - ./data:/app/data
+      - ./exito_scraper/data:/app/exito_scraper/data  # Nueva ruta para datos
       - ./exito_scraper:/app/exito_scraper:ro
     environment:
       - PYTHONPATH=/app

@@ -51,8 +51,8 @@ COPY exito_scraper/ ./exito_scraper/
 COPY format_json.py clean_existing_json.py ./
 COPY requirements.txt ./
 
-# Create data directory
-RUN mkdir -p /app/data && \
+# Create data directory inside exito_scraper
+RUN mkdir -p /app/exito_scraper/data && \
     chown -R scraper:scraper /app
 
 # Switch to non-root user

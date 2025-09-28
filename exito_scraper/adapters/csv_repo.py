@@ -6,9 +6,12 @@ from ..domain.producto import Producto
 from ..domain.ports import RepositoryPort
 
 class CsvRepositoryAdapter(RepositoryPort):
-    def __init__(self, path: str):
-        self.path = Path(path)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, filename: str):
+        # Usar ruta relativa desde el módulo exito_scraper/data
+        base_dir = Path(__file__).parent.parent / "data"  # exito_scraper/data/
+        base_dir.mkdir(exist_ok=True)  # Crear si no existe
+        
+        self.path = base_dir / filename
         self._ensure_header()
 
     def _ensure_header(self):

@@ -6,9 +6,12 @@ from ..domain.producto import Producto
 from pathlib import Path
 
 class JsonRepositoryAdapter(RepositoryPort):
-    def __init__(self, path: str, generate_formatted: bool = True):
-        self.path = Path(path)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, filename: str, generate_formatted: bool = True):
+        # Usar ruta relativa desde el módulo exito_scraper/data
+        base_dir = Path(__file__).parent.parent / "data"  # exito_scraper/data/
+        base_dir.mkdir(exist_ok=True)  # Crear si no existe
+        
+        self.path = base_dir / filename
         self.generate_formatted = generate_formatted
         self.productos_buffer = []
 
